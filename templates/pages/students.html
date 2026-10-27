@@ -1,0 +1,310 @@
+
+{% extends "base.html" %}
+
+{% block title %}Students - StudentHub{% endblock %}
+
+{% block content %}
+
+<!-- Dashboard Header -->
+<section class="welcome">
+    <div>
+        <h1>Students</h1>
+        <p>View and manage all student records.</p>
+    </div>
+
+    <button class="btn-primary" type="button"
+            onclick="openStudentForm()">
+        + Add Student
+    </button>
+</section>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert {{ category }}">{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<!-- Statistics -->
+<section class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon purple">♙</div>
+        <p>Total Students</p>
+        <h2>{{ students|length }}</h2>
+        <small>Registered students</small>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon green">✓</div>
+        <p>Active Students</p>
+        <h2>{{ students|selectattr('status', 'equalto', 'Active')|list|length }}</h2>
+        <small>Currently active</small>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon orange">▤</div>
+        <p>Classes With Students</p>
+        <h2>{{ students|map(attribute='class_id')|unique|list|length }}</h2>
+        <small>Classes with enrollment</small>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon blue">♀</div>
+        <p>Female Students</p>
+        <h2>{{ students|selectattr('gender', 'equalto', 'Female')|list|length }}</h2>
+        <small>Female enrollment</small>
+    </div>
+</section>
+
+<!-- Student Table -->
+<section class="table-card">
+    <div class="table-heading">
+        <h2>Student List</h2>
+        <p>View and manage all student records.</p>
+    </div>
+
+    <div class="table-tools">
+        <input
+            type="search"
+            id="searchInput"
+            placeholder="Search name, email or class..."
+        >
+
+        <select id="statusFilter">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="studentTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>STUDENT</th>
+                    <th>CLASS</th>
+                    <th>EMAIL</th>
+                    <th>GENDER</th>
+                    <th>STATUS</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for student in students %}
+                <tr class="student-row"
+                    data-status="{{ student.status|lower }}">
+
+                    <td>#{{ student.id }}</td>
+
+                    <td>
+                        <div class="student-info">
+                            <div class="avatar">
+                                {{ student.student[0]|upper }}
+                            </div>
+                            <strong>{{ student.student }}</strong>
+                        </div>
+                    </td>
+
+                    <td>
+                        <a class="class-badge"
+                           href="{{ url_for('eachclass', class_id=student.class_id) }}">
+                            {{ student.course_code }}
+                        </a>
+                    </td>
+
+                    <td>{{ student.email }}</td>
+                    <td>{{ student.gender }}</td>
+
+                    <td>
+                        <span class="status {{ student.status|lower }}">
+                            {{ student.status }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <div class="action-buttons">
+                            <form
+                                method="GET"
+                                action="{{ url_for('update_student', student_id=student.id) }}"
+                            >
+                                <button type="submit" class="btn-edit">
+                                    Edit
+                                </button>
+                            </form>
+
+                            <form
+                                method="POST"
+                                action="{{ url_for('delete_student', student_id=student.id) }}"
+                                onsubmit="return confirm('Delete this student?');"
+                            >
+                                <button type="submit" class="btn-delete">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        No students registered yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-footer">
+        Showing <strong id="visibleCount">{{ students|length }}</strong>
+        of {{ students|length }} students
+    </div>
+</section>
+
+<!-- Add Student Modal -->
+<div class="modal-overlay" id="studentModal">
+    <div class="student-modal">
+
+        <div class="modal-header">
+            <div>
+                <h2>Register New Student</h2>
+                <p>Enter information for the new student.</p>
+            </div>
+
+            <button type="button" class="close-btn"
+                    onclick="closeStudentForm()">
+                &times;
+            </button>
+        </div>
+
+        <form action="{{ url_for('create_student') }}"
+              method="POST" id="studentForm">
+
+            <div class="form-group">
+                <label for="student">Student Name</label>
+                <input type="text" id="student" name="student"
+                       maxlength="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email"
+                       maxlength="150" required>
+            </div>
+
+            <div class="form-group">
+                <label for="class_id">Class</label>
+                <select id="class_id" name="class_id" required>
+                    <option value="">Select a class</option>
+                    {% for class_item in classes %}
+                        <option value="{{ class_item.id }}">
+                            {{ class_item.course_code }} -
+                            {{ class_item.course_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="studentStatus">Status</label>
+                    <select id="studentStatus" name="status" required>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel"
+                        onclick="closeStudentForm()">
+                    Cancel
+                </button>
+
+                <button type="submit" class="btn-primary">
+                    Register Student
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Student Modal -->
+<div class="modal-overlay" id="editStudentModal">
+    <div class="student-modal">
+
+        <div class="modal-header">
+            <div>
+                <h2>Edit Student</h2>
+                <p>Update student information.</p>
+            </div>
+
+            <button type="button" class="close-btn"
+                    onclick="closeEditStudent()">
+                &times;
+            </button>
+        </div>
+
+        <form id="editStudentForm" method="POST">
+
+            <div class="form-group">
+                <label for="editStudentName">Student Name</label>
+                <input type="text" id="editStudentName"
+                       name="student" maxlength="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="editStudentEmail">Email Address</label>
+                <input type="email" id="editStudentEmail"
+                       name="email" maxlength="150" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editStudentGender">Gender</label>
+                    <select id="editStudentGender" name="gender" required>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="editStudentStatus">Status</label>
+                    <select id="editStudentStatus" name="status" required>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel"
+                        onclick="closeEditStudent()">
+                    Cancel
+                </button>
+
+                <button type="submit" class="btn-primary">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script src="{{ url_for('static', filename='students.js') }}"></script>
+
+{% endblock %}

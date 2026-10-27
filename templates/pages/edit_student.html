@@ -1,0 +1,83 @@
+
+{% extends "base.html" %}
+
+{% block title %}Edit Student - StudentHub{% endblock %}
+
+{% block content %}
+
+<section class="welcome">
+    <div>
+        <h1>Edit Student</h1>
+        <p>Update the student's information below.</p>
+    </div>
+</section>
+
+<div class="form-card">
+    <form method="POST"
+          action="{{ url_for('update_student', student_id=student.id) }}">
+
+        <div class="form-group">
+            <label for="student">Student Name</label>
+            <input
+                type="text"
+                id="student"
+                name="student"
+                value="{{ student.student }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                value="{{ student.email }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender" name="gender" required>
+                <option value="Male"
+                    {% if student.gender == 'Male' %}selected{% endif %}>
+                    Male
+                </option>
+                <option value="Female"
+                    {% if student.gender == 'Female' %}selected{% endif %}>
+                    Female
+                </option>
+                <option value="Other"
+                    {% if student.gender == 'Other' %}selected{% endif %}>
+                    Other
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status" required>
+                <option value="Active"
+                    {% if student.status == 'Active' %}selected{% endif %}>
+                    Active
+                </option>
+                <option value="Inactive"
+                    {% if student.status == 'Inactive' %}selected{% endif %}>
+                    Inactive
+                </option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-primary">
+            Save Changes
+        </button>
+
+        <a href="{{ url_for('students_page') }}" class="btn-cancel">
+            Cancel
+        </a>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}StudentHub{% endblock %}</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <h2 class="logo">Student<span>Hub</span></h2>
+
+        <p class="menu-title">MENU</p>
+
+        <a href="{{ url_for('index') }}"
+           class="menu-item {% if request.endpoint == 'index' %}active{% endif %}">
+            ▦ Dashboard
+        </a>
+
+        <a href="{{ url_for('students_page') }}"
+           class="menu-item {% if request.endpoint == 'students_page' %}active{% endif %}">
+            ♙ Students
+        </a>
+
+        <a href="{{ url_for('classes_page') }}"
+           class="menu-item {% if request.endpoint == 'classes_page' %}active{% endif %}">
+            ▤ Classes
+        </a>
+
+        <a href="{{ url_for('create_class') }}"
+           class="menu-item {% if request.endpoint == 'create_class' %}active{% endif %}">
+            + Create Class
+        </a>
+
+        <div class="sidebar-bottom">
+            <p class="menu-title">SYSTEM</p>
+            <span class="menu-item">⚙ Settings</span>
+        </div>
+    </aside>
+
+    <div class="main-content">
+
+        <header class="topbar">
+            <div>
+                <h3>Student Management</h3>
+                <p>Manage your students efficiently</p>
+            </div>
+
+            <div class="admin-profile">
+                <div class="admin-avatar">A</div>
+                <div>
+                    <strong>Administrator</strong>
+                    <small>Admin</small>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+
+    </div>
+</div>
+
+</body>
+</html>

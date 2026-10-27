@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Create Class - StudentHub{% endblock %}
+
+{% block content %}
+
+<section class="welcome">
+    <div>
+        <h1>Create New Class</h1>
+        <p>Add a course, classroom, capacity, and schedule.</p>
+    </div>
+
+    <a href="{{ url_for('classes_page') }}" class="btn-primary">
+        View All Classes →
+    </a>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert {{ category }}">{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<section class="class-form-card">
+
+    <div class="class-form-heading">
+        <div class="class-form-icon">+</div>
+        <div>
+            <h2>Class Information</h2>
+            <p>Enter the information for the new class.</p>
+        </div>
+    </div>
+
+    <form action="{{ url_for('create_class') }}" method="POST">
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="course_name">Course Name *</label>
+                <select name="course_name" id="course_name" required>
+                    <option value="">Choose a course</option>
+                    <option>Web Frontend</option>
+                    <option>Web Backend</option>
+                    <option>Full Stack Development</option>
+                    <option>Python Programming</option>
+                    <option>Java Programming</option>
+                    <option>Database Management</option>
+                    <option>Computer Networking</option>
+                    <option>Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="course_code">Course Code *</label>
+                <input type="text" name="course_code" id="course_code"
+                       placeholder="e.g. WEB101" maxlength="30" required>
+            </div>
+
+            <div class="form-group">
+                <label for="room">Classroom *</label>
+                <input type="text" name="room" id="room"
+                       placeholder="e.g. A101" maxlength="30" required>
+            </div>
+
+            <div class="form-group">
+                <label for="capacity">Student Capacity *</label>
+                <input type="number" name="capacity" id="capacity"
+                       min="1" max="1000" value="30" required>
+            </div>
+
+            <div class="form-group">
+                <label for="schedule_days">Class Days *</label>
+                <select name="schedule_days" id="schedule_days" required>
+                    <option value="">Choose days</option>
+                    <option value="Monday-Thursday">Monday - Thursday</option>
+                    <option value="Monday-Friday">Monday - Friday</option>
+                    <option value="Saturday-Sunday">Saturday - Sunday</option>
+                    <option value="Monday-Wednesday-Friday">Monday - Wednesday - Friday</option>
+                    <option value="Tuesday-Thursday">Tuesday - Thursday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="status">Status *</label>
+                <select name="status" id="status" required>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="start_time">Start Time *</label>
+                <select name="start_time" id="start_time" required>
+                    <option value="">Choose start time</option>
+                    {% for hour in range(8, 17) %}
+                    <option value="{{ '%02d:00'|format(hour) }}">
+                        {{ '%02d:00'|format(hour if hour <= 12 else hour - 12) }}
+                        {{ 'AM' if hour < 12 else 'PM' }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="end_time">End Time *</label>
+                <select name="end_time" id="end_time" required>
+                    <option value="">Choose end time</option>
+                    {% for hour in range(9, 18) %}
+                    <option value="{{ '%02d:00'|format(hour) }}">
+                        {{ '%02d:00'|format(hour if hour <= 12 else hour - 12) }}
+                        {{ 'AM' if hour < 12 else 'PM' }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="description">Description</label>
+                <textarea name="description" id="description"
+                          rows="4" placeholder="Describe this course..."></textarea>
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+            <button type="reset" class="btn-cancel">Reset</button>
+            <button type="submit" class="btn-primary">+ Create Class</button>
+        </div>
+
+    </form>
+</section>
+
+{% endblock %}

@@ -1,0 +1,243 @@
+
+{% extends "base.html" %}
+
+{% block title %}Class Students - StudentHub{% endblock %}
+
+{% block content %}
+
+<div class="eachclass-page">
+
+    <!-- Page Header -->
+    <section class="eachclass-header">
+        <div>
+            <p class="breadcrumb">
+                <a href="{{ url_for('classes_page') }}">Classes</a>
+                <span>/</span>
+                {{ class_info.course_code }}
+            </p>
+
+            <h1>{{ class_info.course_name }}</h1>
+            <p class="page-description">
+                Manage students, attendance, and grades for this class.
+            </p>
+        </div>
+
+        <a href="{{ url_for('classes_page') }}" class="back-btn">
+            ← Back to Classes
+        </a>
+    </section>
+
+    <!-- Class Information -->
+    <section class="class-info-grid">
+
+        <div class="info-card">
+            <div class="info-icon">📚</div>
+            <div>
+                <p>Course Code</p>
+                <h3>{{ class_info.course_code }}</h3>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">👥</div>
+            <div>
+                <p>Total Students</p>
+                <h3>{{ students|length }}</h3>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">🏫</div>
+            <div>
+                <p>Room</p>
+                <h3>{{ class_info.room or 'Not assigned' }}</h3>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon">🕒</div>
+            <div>
+                <p>Schedule</p>
+                <h3>
+                    {{ class_info.schedule_days or 'Not set' }}
+                </h3>
+                <span>
+                    {{ class_info.start_display or '--:--' }}
+                    -
+                    {{ class_info.end_display or '--:--' }}
+                </span>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Students Section -->
+    <section class="students-panel">
+
+        <div class="students-panel-header">
+            <div>
+                <h2>Student Records</h2>
+                <p>Record attendance and update student grades.</p>
+            </div>
+
+            <div class="student-search">
+                <span>⌕</span>
+                <input
+                    type="text"
+                    id="studentSearch"
+                    placeholder="Search student..."
+                >
+            </div>
+        </div>
+
+        <!-- Message from JavaScript -->
+        <div id="studentMessage" class="student-message"></div>
+
+        <div class="table-wrapper">
+            <table class="student-records-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Student</th>
+                        <th>Attendance</th>
+                        <th>Present Count</th>
+                        <th>Classwork</th>
+                        <th>Final</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="studentTableBody">
+
+                    {% for student in students %}
+                    <tr class="student-row"
+                        data-student-id="{{ student.id }}">
+
+                        <td class="student-id">
+                            #{{ student.id }}
+                        </td>
+
+                        <td>
+                            <div class="student-name-cell">
+                                <div class="student-avatar">
+                                    {{ student.student[0]|upper if student.student else '?' }}
+                                </div>
+
+                                <div>
+                                    <strong>{{ student.student }}</strong>
+                                    <span>{{ student.email }}</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="attendance-score">
+                                {{ student.attendance or 0 }}
+                            </span>
+                            <span class="score-unit">/ 40.00</span>
+                        </td>
+
+                        <td>
+                            <span class="attendance-count">
+                                {{ student.attendance_count or 0 }}
+                                  
+                            </span>
+                            
+                        </td>
+
+                        <td>
+                            <input
+                                type="number"
+                                class="grade-input classwork-input"
+                                min="0"
+                                max="30"
+                                value="{{ student.classwork or 0 }}"
+                                aria-label="Classwork grade for {{ student.student }}"
+                            >
+                        </td>
+
+                        <td>
+                            <input
+                                type="number"
+                                class="grade-input final-input"
+                                min="0"
+                                max="30"
+                                value="{{ student.final or 0 }}"
+                                aria-label="Final grade for {{ student.student }}"
+                            >
+                        </td>
+
+                        <td>
+                            <span class="total-score">
+                                {{ student.total if student.total is not none else ((student.attendance or 0) + (student.classwork or 0) + (student.final or 0)) }}
+                            </span>
+                            <span class="score-unit">/ 100</span>
+                        <td>
+                            <form action="{{ url_for('save_attendance') }}" method="POST"
+                                class="student-actions">
+
+                                <input type="hidden" name="student_id"
+                                    value="{{ student.id }}">
+
+                                <label>
+                                    <input type="radio"
+                                        name="status"
+                                        value="present"
+                                        required>
+                                    Present
+                                </label>
+
+                                <label>
+                                    <input type="radio"
+                                        name="status"
+                                        value="absent"
+                                        required>
+                                    Absent
+                                </label>
+
+                                <button type="submit" class="btn-save-grades">
+                                    Save
+                                </button>
+
+                            </form>
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <div>📋</div>
+                            <strong>No students in this class yet</strong>
+                            <p>Add students and assign them to this class.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-footer">
+            <span>
+                Showing <strong>{{ students|length }}</strong>
+                student(s)
+            </span>
+            <span>Course: {{ class_info.course_code }}</span>
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='eachclass.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='eachclass.js') }}"></script>
+{% endblock %}

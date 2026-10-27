@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Classes - StudentHub{% endblock %}
+
+{% block content %}
+
+<section class="welcome">
+    <div>
+        <h1>Classes Management</h1>
+        <p>View and manage all registered courses.</p>
+    </div>
+
+    <a href="{{ url_for('create_class') }}" class="btn-primary">
+        + Add Class
+    </a>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="alert {{ category }}">{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<section class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon green">▤</div>
+        <p>Total Classes</p>
+        <h2>{{ classes|length }}</h2>
+        <small>Registered courses</small>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon blue">♙</div>
+        <p>Total Capacity</p>
+        <h2>{{ total_capacity }}</h2>
+        <small>Student places</small>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon purple">✓</div>
+        <p>Active Classes</p>
+        <h2>{{ active_count }}</h2>
+        <small>Active courses</small>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon orange">▣</div>
+        <p>Classrooms</p>
+        <h2>{{ room_count }}</h2>
+        <small>Different rooms</small>
+    </div>
+</section>
+
+<section class="classes-section">
+    <div class="classes-heading">
+        <div>
+            <h2>All Classes</h2>
+            <p>Choose a class to view its students.</p>
+        </div>
+
+        <span class="class-total">{{ classes|length }} Classes</span>
+    </div>
+
+    <div class="table-tools">
+        <input type="search" id="classSearch"
+               placeholder="Search course, code, or room...">
+
+        <select id="statusFilter">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
+    </div>
+
+    <div class="class-grid" id="classGrid">
+        {% for class in classes %}
+        <article class="class-card"
+                 data-status="{{ class.status|lower }}">
+
+            <div class="class-card-top">
+                <div class="class-icon">▤</div>
+                <span class="status {{ class.status|lower }}">
+                    {{ class.status }}
+                </span>
+            </div>
+
+            <span class="class-badge">{{ class.course_code }}</span>
+
+            <h3>{{ class.course_name }}</h3>
+
+            <p class="class-description">
+                {{ class.description or 'No description available.' }}
+            </p>
+
+            <div class="class-details">
+                <div class="class-detail">
+                    <span>⌂</span>
+                    <div>
+                        <small>Classroom</small>
+                        <strong>{{ class.room }}</strong>
+                    </div>
+                </div>
+
+                <div class="class-detail">
+                    <span>♙</span>
+                    <div>
+                        <small>Students / Capacity</small>
+                        <strong>{{ class.student_count }} / {{ class.capacity }}</strong>
+                    </div>
+                </div>
+
+                <div class="class-detail">
+                    <span>◷</span>
+                    <div>
+                        <small>Schedule</small>
+                        <strong>{{ class.schedule_days }}</strong>
+                        <small>
+                            {{ class.start_display }} - {{ class.end_display }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="class-card-footer">
+                <a href="{{ url_for('eachclass', class_id=class.id) }}"
+                   class="view-students-btn">
+                    View Students <span>→</span>
+                </a>
+            </div>
+        </article>
+        {% else %}
+        <div class="no-classes">
+            <h3>No Classes Yet</h3>
+            <p>Create your first class to get started.</p>
+            <a href="{{ url_for('create_class') }}" class="btn-primary">
+                + Add Class
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <p class="classes-footer" id="classesFooter">
+        Showing {{ classes|length }} class(es)
+    </p>
+</section>
+
+<script src="{{ url_for('static', filename='classes.js') }}"></script>
+
+{% endblock %}
